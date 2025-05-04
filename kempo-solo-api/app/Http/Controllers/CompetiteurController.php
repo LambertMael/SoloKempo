@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Competiteur;
 use App\Models\Utilisateur;
+use App\Models\Combat;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CompetiteurController extends Controller
 {
@@ -79,5 +81,67 @@ class CompetiteurController extends Controller
         
         $competiteur->delete();
         return response()->json(null, 204);
+    }
+
+    public function resultats(int $id): JsonResponse
+    {
+        $competiteur = Competiteur::where('id_utilisateur', $id)->firstOrFail();
+        $id = $competiteur->id;
+        // Récupérer tous les combats où le compétiteur est participant
+        $combats = Combat::where('id_p1', $id)
+            ->orWhere('id_p2', $id)
+            ->with(['competiteur1', 'competiteur2', 'poule.tournoi'])
+            ->get()
+            ->map(function ($combat) use ($id) {
+                $estP1 = $combat->id_p1 == $id;
+                return [
+                    'id' => $combat->id,
+                    'tournoi' => $combat->poule->tournoi->nom,
+                    'date_tournoi' => $combat->poule->tournoi->date_debut,
+                    'adversaire' => $estP1 ? $combat->competiteur2 : $combat->competiteur1,
+                    'score_competiteur' => $estP1 ? $combat->score_p1 : $combat->score_p2,
+                    'score_adversaire' => $estP1 ? $combat->score_p2 : $combat->score_p1,
+                    'penalites_competiteur' => $estP1 ? $combat->penalite_p1 : $combat->penalite_p2,
+                    'penalites_adversaire' => $estP1 ? $combat->penalite_p2 : $combat->penalite_p1,
+                    'duree' => $combat->duree,
+                    'victoire' => $this->determinerVictoire($combat, $id)
+                ];
+            });
+
+        // Statistiques globales
+        $stats = [
+            'total_combats' => $combats->count(),
+            'victoires' => $combats->where('victoire', true)->count(),
+            'defaites' => $combats->where('victoire', false)->count(),
+            'egalites' => $combats->whereNull('victoire')->count(),
+        ];
+
+        return response()->json([
+            'competiteur' => $competiteur,
+            'resultats' => $combats,
+            'statistiques' => $stats
+        ]);
+    }
+
+    private function determinerVictoire(Combat $combat, int $competiteurId): ?bool
+    {
+        if ($combat->score_p1 === null || $combat->score_p2 === null) {
+            return null;
+        }
+
+        $scoreNetP1 = $combat->score_p1 - $combat->penalite_p1;
+        $scoreNetP2 = $combat->score_p2 - $combat->penalite_p2;
+
+        if ($scoreNetP1 === $scoreNetP2) {
+            return null; // égalité
+        }
+
+        // Si le compétiteur est P1
+        if ($combat->id_p1 === $competiteurId) {
+            return $scoreNetP1 > $scoreNetP2;
+        }
+
+        // Si le compétiteur est P2
+        return $scoreNetP2 > $scoreNetP1;
     }
 }

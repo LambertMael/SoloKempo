@@ -6,6 +6,7 @@ use App\Models\Tournoi;
 use App\Models\Competiteur;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class TournoiController extends Controller
 {
@@ -25,7 +26,8 @@ class TournoiController extends Controller
     {
         $validated = $request->validate([
             'nom' => 'required|string|max:255',
-            'date' => 'required|date',
+            'date_fin' => 'required|date',
+            'date_debut' => 'required|date',
             'lieu' => 'required|string',
             'systemeElimination' => 'required|string|max:10',
             'id_categorie' => 'required|exists:categorie,id'
@@ -41,7 +43,8 @@ class TournoiController extends Controller
         
         $validated = $request->validate([
             'nom' => 'sometimes|string|max:255',
-            'date' => 'sometimes|date',
+            'date_fin' => 'required|date',
+            'date_debut' => 'required|date',
             'lieu' => 'sometimes|string',
             'systemeElimination' => 'sometimes|string|max:10',
             'id_categorie' => 'sometimes|exists:categorie,id'
@@ -79,5 +82,88 @@ class TournoiController extends Controller
         $tournoi = Tournoi::findOrFail($tournoiId);
         $tournoi->competiteurs()->detach($competiteurId);
         return response()->json(['message' => 'Compétiteur désinscrit du tournoi']);
+    }
+
+    public function listInscrits(int $id): JsonResponse
+    {
+        $tournoi = Tournoi::findOrFail($id);
+        $inscrits = $tournoi->competiteurs()
+            ->with(['club', 'grade', 'categories'])
+            ->get();
+        return response()->json($inscrits);
+    }
+
+    public function inscription(Request $request, int $id): JsonResponse
+    {
+        $tournoi = Tournoi::findOrFail($id);
+        $user = $request->user();
+        
+        // Vérifier que l'utilisateur est un compétiteur
+        if (!$user->competiteur) {
+            throw ValidationException::withMessages([
+                'inscription' => ['Seuls les compétiteurs peuvent s\'inscrire à un tournoi.']
+            ]);
+        }
+
+        // Vérifier que le compétiteur appartient à la catégorie du tournoi
+        if (!$user->competiteur->categories->contains($tournoi->id_categorie)) {
+            throw ValidationException::withMessages([
+                'inscription' => ['Vous n\'appartenez pas à la catégorie de ce tournoi.']
+            ]);
+        }
+
+        // Vérifier que le compétiteur n'est pas déjà inscrit
+        if ($tournoi->competiteurs->contains($user->competiteur->id)) {
+            throw ValidationException::withMessages([
+                'inscription' => ['Vous êtes déjà inscrit à ce tournoi.']
+            ]);
+        }
+
+        $tournoi->competiteurs()->attach($user->competiteur->id);
+        return response()->json(['message' => 'Inscription réussie']);
+    }
+
+    public function desinscription(Request $request, int $id): JsonResponse
+    {
+        $tournoi = Tournoi::findOrFail($id);
+        $user = $request->user();
+        
+        if (!$user->competiteur) {
+            throw ValidationException::withMessages([
+                'desinscription' => ['Seuls les compétiteurs peuvent se désinscrire d\'un tournoi.']
+            ]);
+        }
+
+        if (!$tournoi->competiteurs->contains($user->competiteur->id)) {
+            throw ValidationException::withMessages([
+                'desinscription' => ['Vous n\'êtes pas inscrit à ce tournoi.']
+            ]);
+        }
+
+        $tournoi->competiteurs()->detach($user->competiteur->id);
+        return response()->json(['message' => 'Désinscription réussie']);
+    }
+
+    public function inscrireCompetiteur(int $tournoiId, int $competiteurId): JsonResponse
+    {
+        $tournoi = Tournoi::findOrFail($tournoiId);
+        $competiteur = Competiteur::findOrFail($competiteurId);
+        
+        // Vérifier que le compétiteur appartient à la catégorie du tournoi
+        if (!$competiteur->categories->contains($tournoi->id_categorie)) {
+            throw ValidationException::withMessages([
+                'inscription' => ['Le compétiteur n\'appartient pas à la catégorie de ce tournoi.']
+            ]);
+        }
+
+        // Vérifier que le compétiteur n'est pas déjà inscrit
+        if ($tournoi->competiteurs->contains($competiteurId)) {
+            throw ValidationException::withMessages([
+                'inscription' => ['Le compétiteur est déjà inscrit à ce tournoi.']
+            ]);
+        }
+
+        $tournoi->competiteurs()->attach($competiteurId);
+        return response()->json(['message' => 'Inscription réussie']);
     }
 }

@@ -18,7 +18,8 @@ class Tournoi extends Model
         'id_categorie',
         'systemeElimination',
         'lieu',
-        'date',
+        'date_debut',
+        'date_fin',
         'nom'
     ];
 

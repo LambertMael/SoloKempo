@@ -106,8 +106,7 @@ class UtilisateurController extends Controller
         
         $validated = $request->validate([
             'ancien_mdp' => 'required',
-            'nouveau_mdp' => 'required|min:8|different:ancien_mdp',
-            'confirmation_mdp' => 'required|same:nouveau_mdp'
+            'nouveau_mdp' => 'required|min:8|different:ancien_mdp'
         ]);
 
         if (!Hash::check($validated['ancien_mdp'], $utilisateur->mdp)) {
@@ -118,6 +117,48 @@ class UtilisateurController extends Controller
 
         $utilisateur->mdp = Hash::make($validated['nouveau_mdp']);
         $utilisateur->save();
+
+        return response()->json(['message' => 'Mot de passe modifié avec succès']);
+    }
+
+    public function profile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->load('competiteur.club', 'competiteur.categories', 'clubs');
+        return response()->json($user);
+    }
+
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        $validated = $request->validate([
+            'email' => 'sometimes|email|unique:utilisateur,email,' . $user->id,
+            'nom' => 'sometimes|string|max:255',
+            'prenom' => 'sometimes|string|max:255'
+        ]);
+
+        $user->update($validated);
+        return response()->json($user);
+    }
+
+    public function changePasswordProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        $validated = $request->validate([
+            'ancien_mdp' => 'required',
+            'nouveau_mdp' => 'required|min:8|different:ancien_mdp'
+        ]);
+
+        if (!Hash::check($validated['ancien_mdp'], $user->mdp)) {
+            throw ValidationException::withMessages([
+                'ancien_mdp' => ['Le mot de passe actuel est incorrect.']
+            ]);
+        }
+
+        $user->mdp = Hash::make($validated['nouveau_mdp']);
+        $user->save();
 
         return response()->json(['message' => 'Mot de passe modifié avec succès']);
     }
