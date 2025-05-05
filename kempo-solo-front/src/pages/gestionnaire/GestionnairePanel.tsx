@@ -29,6 +29,7 @@ const GestionnairePanel = () => {
   const [message, setMessage] = useState('')
   const [selectedTournoi, setSelectedTournoi] = useState<Tournoi | null>(null)
   const [isEditing, setIsEditing] = useState(false)
+  const [inscrits, setInscrits] = useState<Array<any>>([])
 
   // Formulaire nouveau tournoi
   const [newTournoi, setNewTournoi] = useState({
@@ -161,6 +162,15 @@ const GestionnairePanel = () => {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur lors du lancement du tournoi'
       setError(errorMessage)
+    }
+  }
+
+  const fetchInscrits = async (tournoiId: number) => {
+    try {
+      const response = await axios.get(`http://localhost:8000/api/tournois/${tournoiId}/inscrits`)
+      setInscrits(response.data)
+    } catch (error) {
+      setError('Erreur lors du chargement des inscrits')
     }
   }
 
@@ -505,6 +515,15 @@ const GestionnairePanel = () => {
                         >
                           Modifier
                         </button>
+                        <button
+                          onClick={() => {
+                            setSelectedTournoi(tournoi)
+                            fetchInscrits(tournoi.id)
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900 ml-4"
+                        >
+                          Voir les inscrits
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -513,6 +532,30 @@ const GestionnairePanel = () => {
             </div>
           </div>
         </div>
+
+        {/* Affichage des inscrits */}
+        {selectedTournoi && (
+          <div className="mt-8 bg-white shadow sm:rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Compétiteurs inscrits pour {selectedTournoi.nom}</h2>
+              {inscrits.length > 0 ? (
+                <ul className="mt-2 divide-y divide-gray-200">
+                  {inscrits.map((inscrit) => (
+                    <li key={inscrit.id} className="py-2">
+                      <p className="text-sm">{inscrit.prenom} {inscrit.nom}</p>
+                      <p className="text-xs text-gray-500">
+                        Club: {inscrit.club?.nom || 'Non affilié'} | 
+                        Grade: {inscrit.grade?.nom || 'Non spécifié'}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-sm text-gray-500">Aucun compétiteur inscrit</p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

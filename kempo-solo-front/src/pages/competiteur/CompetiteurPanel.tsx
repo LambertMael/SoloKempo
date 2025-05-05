@@ -17,33 +17,42 @@ interface TournoiResultat {
 const CompetiteurPanel = () => {
   const { user } = useAuth()
   const [resultats, setResultats] = useState<TournoiResultat[]>([])
+  const [tournoiDisponibles, setTournoiDisponibles] = useState<Array<any>>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const fetchResultats = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/competiteurs/${user?.id}/resultats`)
-        const fetchedResultats = response.data.resultats.map((resultat: any) => ({
+        const [resultatsResponse, tournoiResponse] = await Promise.all([
+          axios.get(`http://localhost:8000/api/competiteurs/${user?.id}/resultats`),
+          axios.get('http://localhost:8000/api/tournois')
+        ])
+        
+        const fetchedResultats = resultatsResponse.data.resultats.map((resultat: any) => ({
           id: resultat.id,
           nom: resultat.tournoi,
-          date_debut: resultat.date_tournoi ? resultat.date_tournoi : 'N/A',
-          date_fin: resultat.date_tournoi ? resultat.date_tournoi : 'N/A',
-          categorie: `${response.data.competiteur.poids}kg`,
+          date_debut: resultat.date_debut,
+          categorie: resultat.competiteur.categorie,
           points: resultat.score_competiteur,
           fautes: resultat.penalites_competiteur,
           placement: resultat.victoire === true ? 1 : resultat.victoire === false ? 2 : 0,
-          statut: resultat.victoire === null ? 'en_cours' : 'termine',
+          statut: resultat.victoire === null ? 'en_cours' : 'termine'
         }))
+        
         setResultats(fetchedResultats)
+        setTournoiDisponibles(tournoiResponse.data.filter((t: any) => t.status === 'a_venir'))
       } catch (err) {
-        setError('Erreur lors du chargement des résultats')
+        setError('Erreur lors du chargement des données')
+        console.error(err)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchResultats()
+    if (user) {
+      fetchData()
+    }
   }, [user])
 
   if (loading) return <div>Chargement...</div>
@@ -56,6 +65,66 @@ const CompetiteurPanel = () => {
           Mon espace compétiteur
         </h1>
 
+        {/* Tournois disponibles */}
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+          <div className="px-4 py-5 sm:px-6">
+            <h2 className="text-lg leading-6 font-medium text-gray-900">
+              Tournois à venir
+            </h2>
+          </div>
+          
+          {tournoiDisponibles.length > 0 ? (
+            <div className="border-t border-gray-200">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tournoi
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Dates
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Lieu
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {tournoiDisponibles.map((tournoi) => (
+                    <tr key={tournoi.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {tournoi.nom}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(tournoi.date_debut).toLocaleDateString()} - {new Date(tournoi.date_fin).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {tournoi.lieu}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <a
+                          href={`/tournois/${tournoi.id}`}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          S'inscrire
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Aucun tournoi disponible pour le moment.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Historique des tournois */}
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:px-6">
             <h2 className="text-lg leading-6 font-medium text-gray-900">
@@ -110,7 +179,7 @@ const CompetiteurPanel = () => {
                         {resultat.fautes}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {resultat.placement}
+                        {resultat.placement === 1 ? '1er' : resultat.placement === 2 ? '2ème' : 'En cours'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

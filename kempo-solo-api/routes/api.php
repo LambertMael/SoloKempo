@@ -107,6 +107,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Tournois et inscriptions (routes protégées)
     Route::get('/tournois/{id}/inscrits', [TournoiController::class, 'listInscrits']);
+    Route::get('/tournois/{id}/inscriptions/{userId}', [TournoiController::class, 'verifierInscription']);
     Route::post('/tournois/{id}/inscription', [TournoiController::class, 'inscription']);
     Route::delete('/tournois/{id}/desinscription', [TournoiController::class, 'desinscription']);
     Route::post('/tournois/{id}/inscriptions/{compId}', [TournoiController::class, 'inscrireCompetiteur']);

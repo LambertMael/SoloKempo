@@ -46,7 +46,7 @@ const TournoiDetail = () => {
       try {
         const response = await axios.get(`http://localhost:8000/api/tournois/${id}`)
         setTournoi(response.data)
-        
+        console.error(response.data)
         // Si l'utilisateur est connecté, vérifier s'il est déjà inscrit
         if (user) {
           try {
@@ -56,10 +56,12 @@ const TournoiDetail = () => {
             setInscription(inscriptionResponse.data)
           } catch (err) {
             // Pas d'inscription trouvée, c'est normal
+            console.error(err)
           }
         }
       } catch (err) {
         setError('Erreur lors du chargement du tournoi')
+        console.error(err)
       } finally {
         setLoading(false)
       }
@@ -69,14 +71,14 @@ const TournoiDetail = () => {
   }, [id, user])
 
   const handleInscription = async () => {
-    if (!selectedCategorie) {
-      setError('Veuillez sélectionner une catégorie')
-      return
-    }
+    // if (!selectedCategorie) {
+    //   setError('Veuillez sélectionner une catégorie')
+    //   return
+    // }
 
     try {
       const response = await axios.post(`http://localhost:8000/api/tournois/${id}/inscriptions`, {
-        id_categorie: selectedCategorie
+        id_categorie: tournoi.id_categorie
       })
       setInscription(response.data)
       setMessage('Inscription réussie !')
@@ -178,7 +180,7 @@ const TournoiDetail = () => {
                   <label htmlFor="categorie" className="block text-sm font-medium text-gray-700">
                     Catégorie
                   </label>
-                  <select
+                  {/* <select
                     id="categorie"
                     className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                     value={selectedCategorie || ''}
@@ -190,7 +192,7 @@ const TournoiDetail = () => {
                         {categorie.nom} ({categorie.age_min}-{categorie.age_max} ans, {categorie.poids_min}-{categorie.poids_max} kg)
                       </option>
                     ))}
-                  </select>
+                  </select> */}
                   
                   <button
                     onClick={handleInscription}
@@ -201,10 +203,11 @@ const TournoiDetail = () => {
                 </div>
               ) : (
                 <div className="mt-5">
-                  <p className="text-sm text-gray-500">
+
+                  {/* <p className="text-sm text-gray-500">
                     Vous êtes inscrit dans la catégorie:{' '}
                     {tournoi.categories.find(c => c.id === inscription.id_categorie)?.nom}
-                  </p>
+                  </p> */}
                   <button
                     onClick={handleDesinscription}
                     className="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"

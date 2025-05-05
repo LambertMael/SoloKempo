@@ -40,10 +40,7 @@ class Utilisateur extends Authenticatable
     public function clubs(): BelongsToMany
     {
         return $this->belongsToMany(Club::class, 'gestionnaire_club', 'id_utilisateur', 'id_club')
-                    ->wherePivot('id_utilisateur', $this->id)
-                    ->whereHas('users', function($query) {
-                        $query->where('role', 'gestionnaire');
-                    });
+                    ->wherePivot('id_utilisateur', $this->id);
     }
 
     public function getAuthPassword()

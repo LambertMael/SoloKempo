@@ -166,4 +166,28 @@ class TournoiController extends Controller
         $tournoi->competiteurs()->attach($competiteurId);
         return response()->json(['message' => 'Inscription réussie']);
     }
+
+    public function verifierInscription(int $id, int $userId): JsonResponse
+    {
+        $tournoi = Tournoi::findOrFail($id);
+        
+        // Trouver le compétiteur à partir de l'id utilisateur
+        $competiteur = Competiteur::where('id_utilisateur', $userId)->firstOrFail();
+        
+        // Vérifier si le compétiteur est inscrit
+        $inscription = $tournoi->competiteurs()
+            ->where('competiteur.id', $competiteur->id)
+            ->first();
+            
+        if (!$inscription) {
+            return response()->json(null, 404);
+        }
+
+        return response()->json([
+            'id' => $inscription->pivot->id ?? $inscription->id,
+            'id_tournoi' => $id,
+            'id_categorie' => $tournoi->id_categorie,
+            'statut' => 'inscrit'
+        ]);
+    }
 }

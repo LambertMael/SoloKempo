@@ -86,19 +86,24 @@ class CompetiteurController extends Controller
     public function resultats(int $id): JsonResponse
     {
         $competiteur = Competiteur::where('id_utilisateur', $id)->firstOrFail();
+        $competiteur->load('categories');
         $id = $competiteur->id;
+        
         // Récupérer tous les combats où le compétiteur est participant
         $combats = Combat::where('id_p1', $id)
             ->orWhere('id_p2', $id)
             ->with(['competiteur1', 'competiteur2', 'poule.tournoi'])
             ->get()
-            ->map(function ($combat) use ($id) {
+            ->map(function ($combat) use ($id, $competiteur) {
                 $estP1 = $combat->id_p1 == $id;
                 return [
                     'id' => $combat->id,
                     'tournoi' => $combat->poule->tournoi->nom,
-                    'date_tournoi' => $combat->poule->tournoi->date_debut,
-                    'adversaire' => $estP1 ? $combat->competiteur2 : $combat->competiteur1,
+                    'date_debut' => $combat->poule->tournoi->date_debut,
+                    'competiteur' => [
+                        'poids' => $competiteur->poids,
+                        'categorie' => $competiteur->categories->first() ? $competiteur->categories->first()->nom : 'Non définie'
+                    ],
                     'score_competiteur' => $estP1 ? $combat->score_p1 : $combat->score_p2,
                     'score_adversaire' => $estP1 ? $combat->score_p2 : $combat->score_p1,
                     'penalites_competiteur' => $estP1 ? $combat->penalite_p1 : $combat->penalite_p2,
