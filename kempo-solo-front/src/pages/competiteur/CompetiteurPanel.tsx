@@ -20,6 +20,9 @@ const CompetiteurPanel = () => {
   const [tournoiDisponibles, setTournoiDisponibles] = useState<Array<any>>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  console.log(user)
+  // Vérification de l'utilisateur
+  console.log(tournoiDisponibles)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,7 +31,7 @@ const CompetiteurPanel = () => {
           axios.get(`http://localhost:8000/api/competiteurs/${user?.id}/resultats`),
           axios.get('http://localhost:8000/api/tournois')
         ])
-        
+        console.log("redata",resultatsResponse.data.resultats)
         const fetchedResultats = resultatsResponse.data.resultats.map((resultat: any) => ({
           id: resultat.id,
           nom: resultat.tournoi,
@@ -37,11 +40,12 @@ const CompetiteurPanel = () => {
           points: resultat.score_competiteur,
           fautes: resultat.penalites_competiteur,
           placement: resultat.victoire === true ? 1 : resultat.victoire === false ? 2 : 0,
-          statut: resultat.victoire === null ? 'en_cours' : 'termine'
+          statut: resultat.victoire === null ? resultat.status_tournoi : 'termine'
         }))
         
         setResultats(fetchedResultats)
-        setTournoiDisponibles(tournoiResponse.data.filter((t: any) => t.status === 'a_venir'))
+        console.log("resultats",fetchedResultats)
+        setTournoiDisponibles(tournoiResponse.data.filter((t: any) => t.status === 'a_venir' && t.competiteurs.some(competiteur => competiteur.id_utilisateur === user?.id)))
       } catch (err) {
         setError('Erreur lors du chargement des données')
         console.error(err)
@@ -109,7 +113,7 @@ const CompetiteurPanel = () => {
                           href={`/tournois/${tournoi.id}`}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
-                          S'inscrire
+                          Détails
                         </a>
                       </td>
                     </tr>

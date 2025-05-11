@@ -24,6 +24,14 @@ class CompetiteurController extends Controller
         return response()->json($competiteur);
     }
 
+    public function detachFromClub(int $id): JsonResponse
+    {
+        $competiteur = Competiteur::findOrFail($id);
+        $competiteur->id_club = null;
+        $competiteur->save();
+        return response()->json($competiteur);
+    }   
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -109,7 +117,8 @@ class CompetiteurController extends Controller
                     'penalites_competiteur' => $estP1 ? $combat->penalite_p1 : $combat->penalite_p2,
                     'penalites_adversaire' => $estP1 ? $combat->penalite_p2 : $combat->penalite_p1,
                     'duree' => $combat->duree,
-                    'victoire' => $this->determinerVictoire($combat, $id)
+                    'victoire' => $this->determinerVictoire($combat, $id),
+                    'status_tournoi' => $combat->poule->tournoi->status,
                 ];
             });
 

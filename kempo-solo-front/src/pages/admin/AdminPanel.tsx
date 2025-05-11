@@ -23,8 +23,15 @@ const AdminPanel = () => {
     mdp: '',
     nom: '',
     prenom: '',
-    role: 'competiteur'
+    role: 'competiteur',
+    id_club: '' // Ajout
   })
+
+  const [clubs, setClubs] = useState([])
+
+    useEffect(() => {
+      axios.get('http://localhost:8000/api/clubs').then(res => setClubs(res.data))
+    }, [])
 
   useEffect(() => {
     fetchUsers()
@@ -52,7 +59,8 @@ const AdminPanel = () => {
         mdp: '',
         nom: '',
         prenom: '',
-        role: 'competiteur'
+        role: 'competiteur',
+        id_club: '' // Ajout
       })
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erreur lors de la création de l\'utilisateur')
@@ -93,6 +101,19 @@ const AdminPanel = () => {
       setError(err.response?.data?.message || 'Erreur lors de l\'import des compétiteurs')
     }
   }
+
+  const handleDeleteUser = async (userId: number) => {
+    if (!confirm('Es-tu sûr de vouloir supprimer cet utilisateur ?')) return;
+  
+    try {
+      await axios.delete(`http://localhost:8000/api/utilisateurs/${userId}`);
+      setUsers(users.filter(user => user.id !== userId));
+      setMessage('Utilisateur supprimé avec succès');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Erreur lors de la suppression');
+    }
+  };
+  
 
   if (loading) return <div>Chargement...</div>
 
@@ -193,6 +214,28 @@ const AdminPanel = () => {
                     <option value="admin">Administrateur</option>
                   </select>
                 </div>
+                {newUser.role === 'competiteur' && (
+                  <div>
+                    <label htmlFor="id_club" className="block text-sm font-medium text-gray-700">
+                      Club
+                    </label>
+                    <select
+                      id="id_club"
+                      required
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-black"
+                      value={newUser.id_club}
+                      onChange={e => setNewUser({ ...newUser, id_club: e.target.value })}
+                    >
+                      <option value="">Sélectionner un club</option>
+                      {clubs.map((club: any) => (
+                        <option key={club.id} value={club.id}>
+                          {club.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
 
                 <div>
                   <button
@@ -301,14 +344,21 @@ const AdminPanel = () => {
                           {user.is_active ? 'Actif' : 'Inactif'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
                         <button
                           onClick={() => handleToggleActive(user.id)}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
                           {user.is_active ? 'Désactiver' : 'Activer'}
                         </button>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Supprimer
+                        </button>
                       </td>
+
                     </tr>
                   ))}
                 </tbody>

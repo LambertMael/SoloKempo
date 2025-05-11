@@ -45,7 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Routes pour consulter les relations club-gestionnaire
     Route::get('/clubs/{id}/gestionnaires', [GestionnaireClubController::class, 'listClubGestionnaires']);
     Route::get('/gestionnaires/{id}/clubs', [GestionnaireClubController::class, 'listGestionnaireClubs']);
-    
+    Route::get('/clubs-gestionnaires', [ClubController::class, 'withGestionnaires']);
+
     // Routes utilisateur accessibles par l'utilisateur lui-même ou un admin
     //->middleware('can:manage,utilisateur');
     Route::middleware('auth:sanctum')->group(function () {
@@ -100,7 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/competiteurs', [CompetiteurController::class, 'store']);
     Route::put('/competiteurs/{id}', [CompetiteurController::class, 'update']);
     Route::delete('/competiteurs/{id}', [CompetiteurController::class, 'destroy']);
-
+    Route::delete('/competiteurs/{id}/detach-club', [CompetiteurController::class, 'detachFromClub']);
     // Liaison Compétiteur-Catégorie
     Route::post('/competiteurs/{id}/categories/{catId}', [CategorieController::class, 'addCompetiteur']);
     Route::delete('/competiteurs/{id}/categories/{catId}', [CategorieController::class, 'removeCompetiteur']);

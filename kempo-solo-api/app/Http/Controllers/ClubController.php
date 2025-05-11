@@ -48,4 +48,19 @@ class ClubController extends Controller
         $club->delete();
         return response()->json(null, 204);
     }
+
+    public function withGestionnaires()
+{
+    $clubs = Club::with([
+        'gestionnaires:id,nom,prenom,email',
+        'competiteurs' => function ($query) {
+            $query->select('id', 'nom', 'prenom', 'id_club', 'id_grade') // ajoute les colonnes nécessaires
+                  ->with('grade:id,nom'); // relation vers grade, ajuste les champs si besoin
+        }
+    ])->get();
+
+    return response()->json($clubs);
+}
+
+
 }

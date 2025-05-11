@@ -77,7 +77,7 @@ const TournoiDetail = () => {
     // }
 
     try {
-      const response = await axios.post(`http://localhost:8000/api/tournois/${id}/inscriptions`, {
+      const response = await axios.post(`http://localhost:8000/api/tournois/${id}/inscription`, {
         id_categorie: tournoi.id_categorie
       })
       setInscription(response.data)
@@ -90,7 +90,7 @@ const TournoiDetail = () => {
 
   const handleDesinscription = async () => {
     try {
-      await axios.delete(`http://localhost:8000/api/tournois/${id}/inscriptions/${user?.id}`)
+      await axios.delete(`http://localhost:8000/api/tournois/${id}/desinscription`)
       setInscription(null)
       setMessage('Désinscription effectuée')
       setError('')

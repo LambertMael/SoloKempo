@@ -105,12 +105,12 @@ class TournoiController extends Controller
             ]);
         }
 
-        // Vérifier que le compétiteur appartient à la catégorie du tournoi
-        if (!$user->competiteur->categories->contains($tournoi->id_categorie)) {
-            throw ValidationException::withMessages([
-                'inscription' => ['Vous n\'appartenez pas à la catégorie de ce tournoi.']
-            ]);
-        }
+        // // Vérifier que le compétiteur appartient à la catégorie du tournoi
+        // if (!$user->competiteur->categories->contains($tournoi->id_categorie)) {
+        //     throw ValidationException::withMessages([
+        //         'inscription' => ['Vous n\'appartenez pas à la catégorie de ce tournoi.']
+        //     ]);
+        // }
 
         // Vérifier que le compétiteur n'est pas déjà inscrit
         if ($tournoi->competiteurs->contains($user->competiteur->id)) {

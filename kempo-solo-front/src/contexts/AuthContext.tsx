@@ -16,7 +16,9 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<void>
   logout: () => void
   isLoading: boolean
+  setUser: React.Dispatch<React.SetStateAction<User | null>>
 }
+
 
 interface RegisterData {
   email: string
@@ -93,7 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, isLoading, setUser }}>
       {children}
     </AuthContext.Provider>
   )

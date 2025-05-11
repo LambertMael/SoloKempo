@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface Tournoi {
   id: number
@@ -22,6 +23,7 @@ interface Categorie {
 }
 
 const GestionnairePanel = () => {
+  const { user } = useAuth()
   const [tournois, setTournois] = useState<Tournoi[]>([])
   const [categories, setCategories] = useState<Categorie[]>([])
   const [loading, setLoading] = useState(true)
@@ -30,6 +32,70 @@ const GestionnairePanel = () => {
   const [selectedTournoi, setSelectedTournoi] = useState<Tournoi | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [inscrits, setInscrits] = useState<Array<any>>([])
+  const [clubCompetiteurs, setClubCompetiteurs] = useState<any[]>([])
+  const [clubId, setClubId] = useState(0)
+
+
+  const fetchAllClubsGestionnaires = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/clubs-gestionnaires")
+      const allClubs = response.data
+  
+      // Trouver le club auquel appartient le user actuel
+      const monClub = allClubs.find((club: any) =>
+        club.gestionnaires.some((g: any) => g.id === user.id)
+      )
+      console.log("monClub",monClub)
+      if (monClub) {
+        setClubId(monClub.id) // ou tout autre traitement utile
+        setClubCompetiteurs(monClub.competiteurs)
+      } else {
+        setError("Aucun club trouvé pour cet utilisateur")
+      }
+    } catch (error) {
+      setError("Erreur lors du chargement des clubs")
+    }
+  }
+  
+  const inscrireCompetiteur = async (idCompetiteur: number) => {
+    try {
+      await axios.post(`http://localhost:8000/api/tournois/${selectedTournoi.id}/competiteurs/${idCompetiteur}`)
+      alert("Inscription réussie !");
+    } catch (error) {
+      alert("Erreur lors de l'inscription.");
+    }
+  };
+  
+  
+
+  const detachCompetiteurFromClub = async (gestionnaireId: number) => {
+    try {
+      await axios.delete(`http://localhost:8000/api/competiteurs/${gestionnaireId}/detach-club`)
+      setClubCompetiteurs(prev => prev.filter(c => c.club_id !== clubId))
+      setMessage('Compétiteur détaché du club')
+    } catch (error) {
+      setError('Erreur lors du détachement du compétiteur')
+    }
+  }
+
+
+  
+  const handleTournoiChange = async (id: number) => {
+    setSelectedTournoi(tournois.find(t => t.id === id) || null)
+    setError('')
+    await fetchInscrits(id)
+  }
+
+  const desinscrireCompetiteur = async (compId: number) => {
+    try {
+      await axios.delete(`http://localhost:8000/api/tournois/${selectedTournoi.id}/competiteurs/${compId}`)
+      setInscrits(prev => prev.filter(i => i.id !== compId))
+      setMessage('Compétiteur désinscrit avec succès')
+    } catch (error) {
+      setError('Erreur lors de la désinscription')
+    }
+  }
+  
 
   // Formulaire nouveau tournoi
   const [newTournoi, setNewTournoi] = useState({
@@ -57,7 +123,8 @@ const GestionnairePanel = () => {
       try {
         const [tournoiResponse, categorieResponse] = await Promise.all([
           axios.get('http://localhost:8000/api/tournois'),
-          axios.get('http://localhost:8000/api/categories')
+          axios.get('http://localhost:8000/api/categories'),
+          fetchAllClubsGestionnaires()
         ])
         setTournois(tournoiResponse.data)
         setCategories(categorieResponse.data)
@@ -167,8 +234,9 @@ const GestionnairePanel = () => {
 
   const fetchInscrits = async (tournoiId: number) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/tournois/${tournoiId}/inscrits`)
-      setInscrits(response.data)
+      const response = await axios.get(`http://localhost:8000/api/tournois/${tournoiId}`)
+      setInscrits(response.data.competiteurs)
+      console.log("inscrits reponse",response.data.competiteurs)
     } catch (error) {
       setError('Erreur lors du chargement des inscrits')
     }
@@ -448,6 +516,83 @@ const GestionnairePanel = () => {
           </div>
         </div>
 
+
+        {/* Liste des comp*/}
+        {clubCompetiteurs.length > 0 && (
+        <div className="mt-8 bg-white shadow sm:rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Compétiteurs de votre club</h2>
+            <ul className="mt-2 divide-y divide-gray-200">
+              {clubCompetiteurs.map((c) => (
+                <li key={c.id} className="py-2 flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-black">{c.prenom} {c.nom}</p>
+                    <p className="text-xs text-gray-500">Grade: {c.grade?.nom || 'Non spécifié'}</p>
+                  </div>
+                  <button
+                    onClick={() => detachCompetiteurFromClub(c.id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Détacher
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+
+
+      {/* Inscription des compétiteurs */}
+      <div className="mt-8 bg-white shadow sm:rounded-lg">
+      <h2 className="text-lg font-medium text-gray-900 mb-4">Inscription des compétiteurs</h2>
+      <div className="mb-4">
+        <label htmlFor="tournoi-select" className="mr-2 text-black">Choisir un tournoi :</label>
+        <select
+          id="tournoi-select"
+          className="text-black"
+          onChange={(e) => handleTournoiChange(Number(e.target.value))}
+          value={selectedTournoi?.id ?? ""}
+        >
+          <option value="">-- Sélectionner --</option>
+          {tournois.map((t) => (
+            <option key={t.id} value={t.id}>{t.nom}</option>
+          ))}
+        </select>
+      </div>
+
+      {error && <p className="text-red-500">{error}</p>}
+
+      <ul className="space-y-2">
+        {clubCompetiteurs.map((comp) => {
+          const inscrit = inscrits.find(c => c.id == comp.id)
+          console.log("inscrit", inscrit)
+          return (
+            <li key={comp.id} className="flex justify-between items-center p-2 border rounded text-gray-700">
+              <span>{comp.prenom} {comp.nom} – {comp.grade?.nom}</span>
+              {inscrit ? (
+                <button
+                  onClick={() => desinscrireCompetiteur(comp.id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                >
+                  Désinscrire
+                </button>
+              ) : (
+                <button
+                  onClick={() => inscrireCompetiteur(comp.id)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                >
+                  Inscrire
+                </button>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      </div>
+
+
         {/* Liste des tournois */}
         <div className="mt-8 bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -542,11 +687,18 @@ const GestionnairePanel = () => {
                 <ul className="mt-2 divide-y divide-gray-200">
                   {inscrits.map((inscrit) => (
                     <li key={inscrit.id} className="py-2">
-                      <p className="text-sm">{inscrit.prenom} {inscrit.nom}</p>
+                      <p className="text-sm text-black">{inscrit.prenom} {inscrit.nom}</p>
                       <p className="text-xs text-gray-500">
                         Club: {inscrit.club?.nom || 'Non affilié'} | 
                         Grade: {inscrit.grade?.nom || 'Non spécifié'}
                       </p>
+                      <button
+                        onClick={() => desinscrireCompetiteur(selectedTournoi.id, inscrit.id)}
+                        className="text-red-600 hover:text-red-800 ml-4"
+                      >
+                        Désinscrire
+                      </button>
+
                     </li>
                   ))}
                 </ul>
