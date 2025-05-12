@@ -27,7 +27,7 @@ const ForgotPassword = () => {
             Réinitialisation du mot de passe
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6 text-gray-900" onSubmit={handleSubmit}>
           {message && (
             <div className="rounded-md bg-green-50 p-4">
               <div className="text-sm text-green-700">{message}</div>
