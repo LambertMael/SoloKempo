@@ -1,0 +1,50 @@
+name: 🌟 Demande d'amélioration
+description: Proposer une nouvelle fonctionnalité ou amélioration
+title: "[FEATURE] : "
+labels: ["enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de décrire clairement l’amélioration souhaitée.
+
+  - type: input
+    id: context
+    attributes:
+      label: Contexte
+      description: Pourquoi cette amélioration est-elle nécessaire ?
+      placeholder: Améliorer l'expérience de gestion des tournois
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description de la fonctionnalité
+      description: Décris précisément ce que tu souhaites ajouter ou modifier
+      placeholder: Ajouter un filtre par région dans la liste des clubs
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefit
+    attributes:
+      label: Bénéfice attendu
+      description: En quoi cette amélioration sera-t-elle bénéfique pour les utilisateurs ?
+      placeholder: Cela permettrait aux administrateurs de trouver plus facilement un club spécifique.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      description: Quelle est la priorité de cette demande ?
+      options:
+        - 🔺 Haute
+        - ⏸️ Moyenne
+        - 🔻 Faible
+    validations:
+      required: true
