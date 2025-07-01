@@ -15,11 +15,8 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, bcmath, sqlite, pdo_sqlite
 
-      - name: Deplacer dans le bon dossier
-        run: cd kempo-solo-api
-
       - name: Installer les dependences
-        run: composer install --prefer-dist --no-progress
+        run: cd kempo-solo-api && composer install --prefer-dist --no-progress
 
       - name: Preparer Laravel
         run: |
