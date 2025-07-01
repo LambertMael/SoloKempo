@@ -20,6 +20,7 @@ jobs:
 
       - name: Preparer Laravel
         run: |
+          cd kempo-solo-api
           cp .env.example .env
           php artisan key:generate
 
