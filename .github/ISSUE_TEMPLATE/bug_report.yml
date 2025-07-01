@@ -1,0 +1,63 @@
+name: 🐛 Bug
+description: Signaler un bug dans l'application
+title: "[BUG] : "
+labels: ["bug"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de remplir ce formulaire pour décrire le bug rencontré.
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environnement
+      description: Où le bug a-t-il été observé ? (dev, prod, autre)
+      placeholder: dev.local / prod.kempo.com
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du bug
+      description: Décris clairement le comportement inattendu
+      placeholder: Le bouton "Créer un club" ne fonctionne pas.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      description: Détaille les étapes précises pour reproduire le problème
+      placeholder: |
+        1. Se connecter
+        2. Aller sur "Créer un club"
+        3. Cliquer sur le bouton "Valider"
+        4. Rien ne se passe
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+      description: Que devait-il se passer ?
+      placeholder: Une notification de succès et redirection vers la liste des clubs.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Gravité
+      description: Quel est l’impact de ce bug ?
+      options:
+        - 🔴 Critique (bloquant)
+        - 🟠 Majeur (fonction partielle)
+        - 🟢 Mineur (non bloquant)
+    validations:
+      required: true
