@@ -19,7 +19,7 @@ jobs:
         run: cd kempo-solo-api
 
       - name: Installer les dependences
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress
 
       - name: Preparer Laravel
         run: |
