@@ -41,6 +41,31 @@ body:
     validations:
       required: true
 
+  
+  - type: input
+    id: environment-os
+    attributes:
+      label: Système d’exploitation
+      placeholder: "Ex : Windows 11 / Ubuntu 22.04 / macOS Ventura"
+    validations:
+      required: false
+
+  - type: input
+    id: environment-browser
+    attributes:
+      label: Navigateur
+      placeholder: "Ex : Chrome 124, Firefox 118"
+    validations:
+      required: false
+
+  - type: input
+    id: environment-version
+    attributes:
+      label: Version de l’application
+      placeholder: "Ex : prod_1.0.0 / dev (commit 9a3f28b)"
+    validations:
+      required: true
+
   - type: textarea
     id: expected
     attributes:
