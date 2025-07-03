@@ -45,7 +45,7 @@ const CompetiteurPanel = () => {
         
         setResultats(fetchedResultats)
         console.log("resultats",fetchedResultats)
-        setTournoiDisponibles(tournoiResponse.data.filter((t: any) => t.status === 'a_venir' && t.competiteurs.some(competiteur => competiteur.id_utilisateur === user?.id)))
+        setTournoiDisponibles(tournoiResponse.data.filter((t: any) => t.status === 'a_venir' && t.competiteurs.some((competiteur: { id_utilisateur: number }) => competiteur.id_utilisateur === user?.id)))
       } catch (err) {
         setError('Erreur lors du chargement des données')
         console.error(err)

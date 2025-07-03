@@ -35,7 +35,7 @@ const TournoiDetail = () => {
   const { id } = useParams<{ id: string }>()
   const [tournoi, setTournoi] = useState<Tournoi | null>(null)
   const [inscription, setInscription] = useState<Inscription | null>(null)
-  const [selectedCategorie, setSelectedCategorie] = useState<number | null>(null)
+  // const [selectedCategorie, setSelectedCategorie] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -78,7 +78,7 @@ const TournoiDetail = () => {
 
     try {
       const response = await axios.post(`http://localhost:8000/api/tournois/${id}/inscription`, {
-        id_categorie: tournoi.id_categorie
+        id_categorie: tournoi?.categories && tournoi.categories[0] ? tournoi.categories[0].id : undefined
       })
       setInscription(response.data)
       setMessage('Inscription réussie !')
@@ -94,8 +94,8 @@ const TournoiDetail = () => {
       setInscription(null)
       setMessage('Désinscription effectuée')
       setError('')
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur lors de la désinscription')
+    } catch (err) {
+      setError('Erreur lors de la désinscription')
     }
   }
 
