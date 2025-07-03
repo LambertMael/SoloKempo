@@ -20,7 +20,12 @@ const ClubList = () => {
     const fetchClubs = async () => {
       try {
         const response = await axios.get('/api/clubs')
+        if (Array.isArray(response.data)) {
         setClubs(response.data)
+      } else {
+        console.error('La réponse /api/clubs n’est pas un tableau :', response.data)
+        setError('Données invalides reçues du serveur')
+      }
       } catch (err: any) {
         setError(err.response?.data?.message || 'Erreur lors du chargement des clubs')
       } finally {
