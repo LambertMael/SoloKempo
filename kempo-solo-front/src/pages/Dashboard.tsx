@@ -20,7 +20,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchTournois = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/tournois')
+        const response = await axios.get('/api/tournois')
         setTournois(response.data)
       } catch (err) {
         setError('Erreur lors du chargement des tournois')

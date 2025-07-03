@@ -30,7 +30,7 @@ const AdminPanel = () => {
   const [clubs, setClubs] = useState([])
 
     useEffect(() => {
-      axios.get('http://localhost:8000/api/clubs').then(res => setClubs(res.data))
+      axios.get('/api/clubs').then(res => setClubs(res.data))
     }, [])
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const AdminPanel = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/utilisateurs')
+      const response = await axios.get('/api/utilisateurs')
       setUsers(response.data)
     } catch (err) {
       setError('Erreur lors du chargement des utilisateurs')
@@ -51,7 +51,7 @@ const AdminPanel = () => {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await axios.post('http://localhost:8000/api/utilisateurs', newUser)
+      const response = await axios.post('/api/utilisateurs', newUser)
       setUsers([...users, response.data])
       setMessage('Utilisateur créé avec succès')
       setNewUser({
@@ -69,7 +69,7 @@ const AdminPanel = () => {
 
   const handleToggleActive = async (userId: number) => {
     try {
-      await axios.post(`http://localhost:8000/api/utilisateurs/${userId}/toggle-active`)
+      await axios.post(`/api/utilisateurs/${userId}/toggle-active`)
       const updatedUsers = users.map(user =>
         user.id === userId ? { ...user, is_active: !user.is_active } : user
       )
@@ -88,7 +88,7 @@ const AdminPanel = () => {
     formData.append('file', file)
 
     try {
-      await axios.post('http://localhost:8000/api/competiteurs/import', formData, {
+      await axios.post('/api/competiteurs/import', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -106,7 +106,7 @@ const AdminPanel = () => {
     if (!confirm('Es-tu sûr de vouloir supprimer cet utilisateur ?')) return;
   
     try {
-      await axios.delete(`http://localhost:8000/api/utilisateurs/${userId}`);
+      await axios.delete(`/api/utilisateurs/${userId}`);
       setUsers(users.filter(user => user.id !== userId));
       setMessage('Utilisateur supprimé avec succès');
     } catch (err: any) {

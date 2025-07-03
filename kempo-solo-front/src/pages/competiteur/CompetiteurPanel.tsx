@@ -28,8 +28,8 @@ const CompetiteurPanel = () => {
     const fetchData = async () => {
       try {
         const [resultatsResponse, tournoiResponse] = await Promise.all([
-          axios.get(`http://localhost:8000/api/competiteurs/${user?.id}/resultats`),
-          axios.get('http://localhost:8000/api/tournois')
+          axios.get(`/api/competiteurs/${user?.id}/resultats`),
+          axios.get('/api/tournois')
         ])
         console.log("redata",resultatsResponse.data.resultats)
         const fetchedResultats = resultatsResponse.data.resultats.map((resultat: any) => ({

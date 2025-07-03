@@ -10,7 +10,7 @@ const ForgotPassword = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await axios.post('http://localhost:8000/api/forgot-password', { email })
+      await axios.post('/api/forgot-password', { email })
       setMessage('Les instructions de réinitialisation ont été envoyées à votre adresse email.')
       setError('')
     } catch (err) {

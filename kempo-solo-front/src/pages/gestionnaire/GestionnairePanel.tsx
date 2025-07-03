@@ -38,7 +38,7 @@ const GestionnairePanel = () => {
 
   const fetchAllClubsGestionnaires = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/clubs-gestionnaires")
+      const response = await axios.get("/api/clubs-gestionnaires")
       const allClubs = response.data
   
       // Trouver le club auquel appartient le user actuel
@@ -59,7 +59,7 @@ const GestionnairePanel = () => {
   
   const inscrireCompetiteur = async (idCompetiteur: number) => {
     try {
-      await axios.post(`http://localhost:8000/api/tournois/${selectedTournoi.id}/competiteurs/${idCompetiteur}`)
+      await axios.post(`/api/tournois/${selectedTournoi.id}/competiteurs/${idCompetiteur}`)
       alert("Inscription réussie !");
     } catch (error) {
       alert("Erreur lors de l'inscription.");
@@ -70,7 +70,7 @@ const GestionnairePanel = () => {
 
   const detachCompetiteurFromClub = async (gestionnaireId: number) => {
     try {
-      await axios.delete(`http://localhost:8000/api/competiteurs/${gestionnaireId}/detach-club`)
+      await axios.delete(`/api/competiteurs/${gestionnaireId}/detach-club`)
       setClubCompetiteurs(prev => prev.filter(c => c.club_id !== clubId))
       setMessage('Compétiteur détaché du club')
     } catch (error) {
@@ -88,7 +88,7 @@ const GestionnairePanel = () => {
 
   const desinscrireCompetiteur = async (compId: number) => {
     try {
-      await axios.delete(`http://localhost:8000/api/tournois/${selectedTournoi.id}/competiteurs/${compId}`)
+      await axios.delete(`/api/tournois/${selectedTournoi.id}/competiteurs/${compId}`)
       setInscrits(prev => prev.filter(i => i.id !== compId))
       setMessage('Compétiteur désinscrit avec succès')
     } catch (error) {
@@ -122,8 +122,8 @@ const GestionnairePanel = () => {
     const fetchData = async () => {
       try {
         const [tournoiResponse, categorieResponse] = await Promise.all([
-          axios.get('http://localhost:8000/api/tournois'),
-          axios.get('http://localhost:8000/api/categories'),
+          axios.get('/api/tournois'),
+          axios.get('/api/categories'),
           fetchAllClubsGestionnaires()
         ])
         setTournois(tournoiResponse.data)
@@ -141,7 +141,7 @@ const GestionnairePanel = () => {
   const handleCreateTournoi = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await axios.post('http://localhost:8000/api/tournois', newTournoi)
+      const response = await axios.post('/api/tournois', newTournoi)
       setTournois([...tournois, response.data])
       setMessage('Tournoi créé avec succès')
       setNewTournoi({
@@ -162,7 +162,7 @@ const GestionnairePanel = () => {
   const handleCreateCategorie = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await axios.post('http://localhost:8000/api/categories', newCategorie)
+      const response = await axios.post('/api/categories', newCategorie)
       setCategories([...categories, response.data])
       setMessage('Catégorie créée avec succès')
       setNewCategorie({
@@ -198,7 +198,7 @@ const GestionnairePanel = () => {
     if (!selectedTournoi) return
 
     try {
-      const response = await axios.put(`http://localhost:8000/api/tournois/${selectedTournoi.id}`, newTournoi)
+      const response = await axios.put(`/api/tournois/${selectedTournoi.id}`, newTournoi)
       setTournois(tournois.map(t => t.id === selectedTournoi.id ? response.data : t))
       setMessage('Tournoi modifié avec succès')
       setIsEditing(false)
@@ -220,7 +220,7 @@ const GestionnairePanel = () => {
 
   const handleLaunchTournoi = async (tournoiId: number) => {
     try {
-      await axios.post(`http://localhost:8000/api/tournois/${tournoiId}/launch`)
+      await axios.post(`/api/tournois/${tournoiId}/launch`)
       const updatedTournois = tournois.map(t => 
         t.id === tournoiId ? { ...t, status: 'en_cours' } : t
       )
@@ -234,7 +234,7 @@ const GestionnairePanel = () => {
 
   const fetchInscrits = async (tournoiId: number) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/tournois/${tournoiId}`)
+      const response = await axios.get(`/api/tournois/${tournoiId}`)
       setInscrits(response.data.competiteurs)
       console.log("inscrits reponse",response.data.competiteurs)
     } catch (error) {

@@ -29,7 +29,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchAllClubsGestionnaires = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/clubs-gestionnaires")
+        const response = await axios.get("/api/clubs-gestionnaires")
         const allClubs = response.data
   
         // Trouver le club auquel appartient le user actuel
@@ -110,7 +110,7 @@ const UserProfile = () => {
 
     try {
       console.log("userFormData",userFormData)
-      const response = await axios.put(`http://localhost:8000/api/utilisateurs/${user?.id}`, userFormData)
+      const response = await axios.put(`/api/utilisateurs/${user?.id}`, userFormData)
       console.log("response",response.data)
       setUser({ ...user, ...userFormData })
       setMessage('Informations personnelles mises à jour avec succès')
@@ -126,7 +126,7 @@ const UserProfile = () => {
     setMessage('')
 
     try {
-      await axios.post(`http://localhost:8000/api/utilisateurs/${user?.id}/change-password`, formData)
+      await axios.post(`/api/utilisateurs/${user?.id}/change-password`, formData)
       setMessage('Mot de passe modifié avec succès')
       setFormData({
         ancien_mdp: '',
@@ -161,7 +161,7 @@ const handleCompetiteurDataSubmit = async (e: React.FormEvent) => {
   setError('')
   setMessage('')
   try {
-    const response = await axios.put(`http://localhost:8000/api/competiteurs/${user?.competiteur?.id}`, competiteurFormData)
+    const response = await axios.put(`/api/competiteurs/${user?.competiteur?.id}`, competiteurFormData)
     const updatedUser = {
       ...user,
       competiteur: {

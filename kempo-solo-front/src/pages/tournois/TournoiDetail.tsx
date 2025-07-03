@@ -44,14 +44,14 @@ const TournoiDetail = () => {
   useEffect(() => {
     const fetchTournoi = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/tournois/${id}`)
+        const response = await axios.get(`/api/tournois/${id}`)
         setTournoi(response.data)
         console.error(response.data)
         // Si l'utilisateur est connecté, vérifier s'il est déjà inscrit
         if (user) {
           try {
             const inscriptionResponse = await axios.get(
-              `http://localhost:8000/api/tournois/${id}/inscriptions/${user.id}`
+              `/api/tournois/${id}/inscriptions/${user.id}`
             )
             setInscription(inscriptionResponse.data)
           } catch (err) {
@@ -77,7 +77,7 @@ const TournoiDetail = () => {
     // }
 
     try {
-      const response = await axios.post(`http://localhost:8000/api/tournois/${id}/inscription`, {
+      const response = await axios.post(`/api/tournois/${id}/inscription`, {
         id_categorie: tournoi.id_categorie
       })
       setInscription(response.data)
@@ -90,7 +90,7 @@ const TournoiDetail = () => {
 
   const handleDesinscription = async () => {
     try {
-      await axios.delete(`http://localhost:8000/api/tournois/${id}/desinscription`)
+      await axios.delete(`/api/tournois/${id}/desinscription`)
       setInscription(null)
       setMessage('Désinscription effectuée')
       setError('')

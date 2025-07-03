@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/profile')
+      const response = await axios.get('/api/profile')
       setUser(response.data)
     } catch (error) {
       localStorage.removeItem('token')
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, mdp: string) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/login', { email, mdp })
+      const response = await axios.post('/api/login', { email, mdp })
       const { token: newToken, user: userData } = response.data
       localStorage.setItem('token', newToken)
       setToken(newToken)
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (data: RegisterData) => {
     try {
-      const response = await axios.post('http://localhost:8000/api/register', data)
+      const response = await axios.post('/api/register', data)
       const { token: newToken, user: userData } = response.data
       localStorage.setItem('token', newToken)
       setToken(newToken)
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await axios.post('http://localhost:8000/api/logout')
+      await axios.post('/api/logout')
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
