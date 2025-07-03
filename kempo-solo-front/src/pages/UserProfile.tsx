@@ -1,6 +1,8 @@
-import { use, useEffect, useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import axios from 'axios'
+
+import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
+import type { Club, Pays, Grade } from '../types';
 
 const UserProfile = () => {
   const { user, setUser } = useAuth()
@@ -8,8 +10,8 @@ const UserProfile = () => {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
-  const [clubs, setClubs] = useState<Club[]>([])
-  const [clubId, setClubId] = useState(0)
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [clubId, setClubId] = useState<number>(0);
 
   useEffect(() => {
     const fetchClubs = async () => { const response = await axios.get('/api/clubs')
@@ -34,7 +36,7 @@ const UserProfile = () => {
   
         // Trouver le club auquel appartient le user actuel
         const monClub = allClubs.find((club: any) =>
-          club.gestionnaires.some((g: any) => g.id === user.id)
+          club.gestionnaires.some((g: any) => user && g.id === user.id)
         )
         console.log("monClub", monClub)
         if (monClub) {
@@ -66,9 +68,9 @@ const UserProfile = () => {
     poids: user?.competiteur?.poids || 0,
     pays_id: user?.competiteur?.id_pays || 0,
     grade_id: user?.competiteur?.id_grade || 0,
-    date_naissance: user?.competiteur?.date_naissance.split("T")[0] || '',
+    date_naissance: user?.competiteur?.date_naissance ? user.competiteur.date_naissance.split('T')[0] : '',
     sexe: user?.competiteur?.sexe || '',
-  })
+  });
 
   
   const [isEditing, setIsEditing] = useState(false)
@@ -112,7 +114,7 @@ const UserProfile = () => {
       console.log("userFormData",userFormData)
       const response = await axios.put(`/api/utilisateurs/${user?.id}`, userFormData)
       console.log("response",response.data)
-      setUser({ ...user, ...userFormData })
+      setUser(user ? { ...user, ...userFormData } : null);
       setMessage('Informations personnelles mises à jour avec succès')
       setIsEditing(false)
     } catch (err: any) {
@@ -140,43 +142,9 @@ const UserProfile = () => {
 
 
   // Ajout dans les states :
-const [competiteurFormData, setCompetiteurFormData] = useState({
-  poids: user?.competiteur?.poids || '',
-  pays: user?.competiteur?.id_pays || '',
-  grade: user?.competiteur?.id_grade || '',
-  club_id: user?.competiteur?.club?.id || '',
-})
 
-const handleCompetiteurChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-) => {
-  setCompetiteurFormData({
-    ...competiteurFormData,
-    [e.target.name]: e.target.value
-  })
-}
 
-const handleCompetiteurDataSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setError('')
-  setMessage('')
-  try {
-    const response = await axios.put(`/api/competiteurs/${user?.competiteur?.id}`, competiteurFormData)
-    const updatedUser = {
-      ...user,
-      competiteur: {
-        ...user.competiteur,
-        ...competiteurFormData,
-        club: clubs.find(c => c.id == competiteurFormData.club_id) || null
-      }
-    }
-    setUser(updatedUser)
-    setMessage('Informations compétiteur mises à jour avec succès')
-    setIsEditing(false)
-  } catch (err: any) {
-    setError(err.response?.data?.message || 'Erreur lors de la mise à jour compétiteur')
-  }
-}
+
 
 
   if (!user) return null
@@ -321,7 +289,7 @@ const handleCompetiteurDataSubmit = async (e: React.FormEvent) => {
                 {user.role === 'competiteur' && (<div v-if="user.club_id!=''" className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">Club</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {user.competiteur?.club?.nom || 'Aucun club associé'}
+              {user?.competiteur?.club?.nom || 'Aucun club associé'}
                   </dd>
                 </div>)}
                 {user.role === 'gestionnaire' && (<div v-if="user.club_id!=''" className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -466,13 +434,13 @@ const handleCompetiteurDataSubmit = async (e: React.FormEvent) => {
           <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Club</dt>
             <dd className="text-sm text-gray-900">
-              {user.competiteur?.club?.nom || 'Aucun club'}
+              {user?.competiteur?.club?.nom || 'Aucun club'}
             </dd>
           </div>
           <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Poids</dt>
             <dd className="text-sm text-gray-900">
-              {user.competiteur?.poids ?? 'Non renseigné'}
+              {user?.competiteur?.poids ?? 'Non renseigné'}
             </dd>
           </div>
           <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
@@ -496,7 +464,7 @@ const handleCompetiteurDataSubmit = async (e: React.FormEvent) => {
           <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Date de naissance</dt>
             <dd className="text-sm text-gray-900 ">
-              {user?.competiteur?.date_naissance.toString().substring(0,10) || 'Non renseigné'}
+              {user?.competiteur?.date_naissance ? user.competiteur.date_naissance.toString().substring(0,10) : 'Non renseigné'}
             </dd>
           </div>
         </dl>

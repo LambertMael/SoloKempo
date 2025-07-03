@@ -43,7 +43,7 @@ const GestionnairePanel = () => {
   
       // Trouver le club auquel appartient le user actuel
       const monClub = allClubs.find((club: any) =>
-        club.gestionnaires.some((g: any) => g.id === user.id)
+        club.gestionnaires.some((g: any) => user && g.id === user.id)
       )
       console.log("monClub",monClub)
       if (monClub) {
@@ -59,7 +59,8 @@ const GestionnairePanel = () => {
   
   const inscrireCompetiteur = async (idCompetiteur: number) => {
     try {
-      await axios.post(`/api/tournois/${selectedTournoi.id}/competiteurs/${idCompetiteur}`)
+    if (!selectedTournoi) return;
+    await axios.post(`/api/tournois/${selectedTournoi.id}/competiteurs/${idCompetiteur}`)
       alert("Inscription réussie !");
     } catch (error) {
       alert("Erreur lors de l'inscription.");
@@ -88,7 +89,8 @@ const GestionnairePanel = () => {
 
   const desinscrireCompetiteur = async (compId: number) => {
     try {
-      await axios.delete(`/api/tournois/${selectedTournoi.id}/competiteurs/${compId}`)
+    if (!selectedTournoi) return;
+    await axios.delete(`/api/tournois/${selectedTournoi.id}/competiteurs/${compId}`)
       setInscrits(prev => prev.filter(i => i.id !== compId))
       setMessage('Compétiteur désinscrit avec succès')
     } catch (error) {
@@ -187,8 +189,8 @@ const GestionnairePanel = () => {
       date_fin: tournoi.date_fin,
       lieu: tournoi.lieu,
       description: tournoi.description,
-      systemeElimination: tournoi.systemeElimination,
-      id_categorie: tournoi.id_categorie
+      systemeElimination: (tournoi as any).systemeElimination,
+      id_categorie: (tournoi as any).id_categorie
     })
     setIsEditing(true)
   }
@@ -693,7 +695,7 @@ const GestionnairePanel = () => {
                         Grade: {inscrit.grade?.nom || 'Non spécifié'}
                       </p>
                       <button
-                        onClick={() => desinscrireCompetiteur(selectedTournoi.id, inscrit.id)}
+                        onClick={() => selectedTournoi && desinscrireCompetiteur(inscrit.id)}
                         className="text-red-600 hover:text-red-800 ml-4"
                       >
                         Désinscrire

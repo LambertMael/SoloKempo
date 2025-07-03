@@ -1,0 +1,28 @@
+name: Lancer les tests Laravel
+
+on: [push, pull_request]
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, bcmath, sqlite, pdo_sqlite
+
+      - name: Installer les dependences
+        run: cd kempo-solo-api && composer install --prefer-dist --no-progress
+
+      - name: Preparer Laravel
+        run: |
+          cd kempo-solo-api
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Lancer les tests
+        run: cd kempo-solo-api && php artisan test

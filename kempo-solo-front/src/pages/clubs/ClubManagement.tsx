@@ -29,7 +29,7 @@ interface Manager {
 const ClubManagement = () => {
   const [clubs, setClubs] = useState<Club[]>([])
   const [managers, setManagers] = useState<Manager[]>([])
-  const [selectedClub, setSelectedClub] = useState<Club | null>(null)
+  // const [selectedClub, setSelectedClub] = useState<Club | null>(null)
   const [newClubName, setNewClubName] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
