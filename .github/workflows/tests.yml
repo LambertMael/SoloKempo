@@ -1,28 +1,56 @@
-name: Lancer les tests Laravel
+name: CI Laravel + Front + SonarCloud
 
 on: [push, pull_request]
 
 jobs:
-  laravel-tests:
+  tests-and-sonar:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      # -------------------- Backend Laravel --------------------
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: mbstring, bcmath, sqlite, pdo_sqlite
+          coverage: xdebug
 
-      - name: Installer les dependences
+      - name: Backend - Install dependencies
         run: cd kempo-solo-api && composer install --prefer-dist --no-progress
 
-      - name: Preparer Laravel
+      - name: Backend - Setup Laravel
         run: |
           cd kempo-solo-api
           cp .env.example .env
           php artisan key:generate
 
-      - name: Lancer les tests
-        run: cd kempo-solo-api && php artisan test
+      - name: Backend - Run tests with coverage
+        run: |
+          cd kempo-solo-api
+          mkdir -p storage/coverage
+          php artisan test --coverage-clover storage/coverage/coverage.xml
+
+      # -------------------- Frontend React/TS --------------------
+      - name: Frontend - Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Frontend - Install dependencies
+        run: cd kempo-front && npm ci
+
+      - name: Frontend - Run tests with coverage
+        run: |
+          cd kempo-front
+          npm run test -- --coverage
+          # Lcov is usually generated in coverage/lcov.info
+
+      # -------------------- Analyse SonarCloud --------------------
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          args: >
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
