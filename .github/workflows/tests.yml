@@ -34,9 +34,3 @@ jobs:
           php artisan test --coverage-clover storage/coverage/coverage.xml
 
 
-      # -------------------- Analyse SonarCloud --------------------
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
