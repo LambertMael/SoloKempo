@@ -44,7 +44,7 @@ jobs:
 
       - name: Frontend - Run tests with coverage
         run: |
-          cd kempo-front
+          cd kempo-solo-front
           npm run test -- --coverage
           # Lcov is usually generated in coverage/lcov.info
 
