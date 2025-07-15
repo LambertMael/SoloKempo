@@ -40,7 +40,7 @@ jobs:
           node-version: '20'
 
       - name: Frontend - Install dependencies
-        run: cd kempo-front && npm ci
+        run: cd kempo-solo-front && npm ci
 
       - name: Frontend - Run tests with coverage
         run: |
