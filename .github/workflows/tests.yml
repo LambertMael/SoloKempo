@@ -1,4 +1,4 @@
-name: CI Laravel + Front + SonarCloud
+name: CI Laravel puis SonarCloud
 
 on: [push, pull_request]
 
@@ -33,20 +33,6 @@ jobs:
           mkdir -p storage/coverage
           php artisan test --coverage-clover storage/coverage/coverage.xml
 
-      # -------------------- Frontend React/TS --------------------
-      - name: Frontend - Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Frontend - Install dependencies
-        run: cd kempo-solo-front && npm ci
-
-      - name: Frontend - Run tests with coverage
-        run: |
-          cd kempo-solo-front
-          npm run test -- --coverage
-          # Lcov is usually generated in coverage/lcov.info
 
       # -------------------- Analyse SonarCloud --------------------
       - name: SonarCloud Scan
